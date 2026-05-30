@@ -16,10 +16,9 @@ This plugin integrates FM-Agent into Claude Code for automated code reasoning an
 | `/fm-agent:install` | Clone FM-Agent to the plugin data directory |
 | `/fm-agent:config` | Show/modify FM-Agent configuration |
 | `/fm-agent:run` | Execute FM-Agent analysis on current project (background) |
-| `/fm-agent:auto-fix` | Run the commit-triggered FM-Agent verification-repair loop for a specific commit |
+| `/fm-agent:auto-fix` | Run FM-Agent verification-repair loop for the whole codebase |
 | `/fm-agent:diagnose` | View bug analysis results |
 | `/fm-agent:help` | Show help information |
-| `/fm-agent:export` | Export current conversation of last commit |
 
 ## install
 
@@ -64,7 +63,7 @@ Execute FM-Agent from the plugin data directory to analyze the current project d
 Run the FM-Agent verification-repair-review loop with `/fm-agent:auto-fix <max-iterations>`.
 
 Usage and constraints:
-- The loop starts from the current project working tree and does not require a commit id
+- The loop starts from the current project working tree
 - The loop runs one full-project FM-Agent verification round first; incremental verification is not allowed in auto-fix mode
 - If FM-Agent reports bugs, the plugin launches one dedicated coding-agent repair sub-session for the full bug batch
 - After each repair round, the plugin launches one dedicated reviewer sub-session to decide whether the reported bugs are fixed
@@ -84,10 +83,6 @@ Read FM-Agent output from `./fm_agent/`:
 - **Details on request**: Show individual bug reports (`<source>--<function>.md`)
 - Bug reports include: specification claim, actual behavior, code evidence, trigger condition, probe script, probe output
 
-## export
-
-Export conversation of current session related to latest commit.
-
 ## Prerequisites
 
 - Ubuntu 22.04+ or compatible Linux distribution
@@ -103,15 +98,3 @@ Analysis results in `./fm_agent/`:
 ## Supported Languages
 
 Rust, C, C++, Python, Java, Go, CUDA, JavaScript, TypeScript, ArkTS
-
-## Hooks
-
-### Auto-Export After Commit
-
-A PostToolUse hook automatically invokes `/fm-agent:export <commit-id>` after each `git commit`, preserving conversation context for the commit.
-
-- **Trigger:** `git commit` and `git commit -m "..."`
-- **Action:** Exports conversation to file named after commit hash
-- **Auto-fix note:** Auto-fix is started manually with `/fm-agent:auto-fix <max-iterations>` from the current working tree; the hook does not branch into auto-fix from commit messages
-- **Incremental note:** After export, the normal flow asks whether to run FM-Agent incremental analysis for that commit's changes
-- **Note:** Requires `/fm-agent:export` command to be available in the session
